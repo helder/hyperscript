@@ -1,0 +1,5 @@
+--macro helder.vdom.libraries.Mithril.register()
+-lib tink_csss
+-cp tests
+-dce full
+-main RunTests

@@ -1,0 +1,17 @@
+{
+  "name": "hyperscript",
+  "license": "MIT",
+  "tags": [
+    "html",
+    "cross"
+  ],
+  "classPath": "src",
+  "contributors": [
+    "benmerckx"
+  ],
+  "releasenote": "initial release",
+  "version": "0.0.0",
+  "dependencies": {
+    "tink_csss": ""
+  }
+}
