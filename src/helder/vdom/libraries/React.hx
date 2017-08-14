@@ -1,21 +1,22 @@
 package helder.vdom.libraries;
 
 import helder.vdom.Hyperscript;
-import helder.vdom.Selector;
+import helder.vdom.AttributeMapper;
 import haxe.macro.Expr;
-import haxe.DynamicAccess;
 
+#if !macro
+import helder.vdom.Selector;
 @:native('React') #if !no_require @:jsRequire('react') #end
 extern class ReactExtern {
-    public static function createElement(selector: Selector, attrs: Dynamic, children: Dynamic): Dynamic;
+    public static function createElement<Attrs>(selector: Selector<Attrs>, attrs: Attrs, children: Dynamic): Dynamic;
 }
+#end
 
 class React {
 
-    static inline var HAXE_KEY_PREFIX = "@$__hx__";
-
     // Source: https://github.com/insin/babel-plugin-react-html-attrs/blob/master/lib/translations.js
-    static var htmlAttrs = [
+    // Source: https://facebook.github.io/react/docs/events.html
+    public static var attrMap = [
         'accesskey' => 'accessKey',
         'allowfullscreen' => 'allowFullScreen',
         'allowtransparency' => 'allowTransparency',
@@ -68,35 +69,73 @@ class React {
         'class' => 'className',
         'for' => 'htmlFor',
         'accept-charset' => 'acceptCharset',
-        'http-equiv' => 'httpEquiv'
-    ];
-
-    // Source: https://facebook.github.io/react/docs/events.html
-    static var events = '
-        onCopy onCut onPaste
-        onCompositionEnd onCompositionStart onCompositionUpdate
-        onKeyDown onKeyPress onKeyUp
-        onFocus onBlur
-        onClick onContextMenu onDoubleClick onDrag onDragEnd onDragEnter onDragExit
-        onDragLeave onDragOver onDragStart onDrop onMouseDown onMouseEnter onMouseLeave
-        onMouseMove onMouseOut onMouseOver onMouseUp
-        onSelect
-        onTouchCancel onTouchEnd onTouchMove onTouchStart
-        onScroll
-        onWheel
-        onAbort onCanPlay onCanPlayThrough onDurationChange onEmptied onEncrypted 
-        onEnded onError onLoadedData onLoadedMetadata onLoadStart onPause onPlay 
-        onPlaying onProgress onRateChange onSeeked onSeeking onStalled onSuspend 
-        onTimeUpdate onVolumeChange onWaiting
-        onLoad onError
-        onAnimationStart onAnimationEnd onAnimationIteration
-        onTransitionEnd
-    '.split(' ')
-    .filter(function(event) return event != '');
-
-    static var eventAttrs = [
-        for (event in events) 
-            event.toLowerCase() => event
+        'http-equiv' => 'httpEquiv',
+        'oninput' => 'onChange',
+        'onchange' => 'onChange',
+        'oncopy' => 'onCopy',
+        'oncut' => 'onCut',
+        'onpaste' => 'onPaste',
+        'oncompositionend' => 'onCompositionEnd',
+        'oncompositionstart' => 'onCompositionStart',
+        'oncompositionupdate' => 'onCompositionUpdate',
+        'onkeydown' => 'onKeyDown',
+        'onkeypress' => 'onKeyPress',
+        'onkeyup' => 'onKeyUp',
+        'onfocus' => 'onFocus',
+        'onblur' => 'onBlur',
+        'onclick' => 'onClick',
+        'oncontextmenu' => 'onContextMenu',
+        'ondoubleclick' => 'onDoubleClick',
+        'ondrag' => 'onDrag',
+        'ondragend' => 'onDragEnd',
+        'ondragenter' => 'onDragEnter',
+        'ondragexit' => 'onDragExit',
+        'ondragleave' => 'onDragLeave',
+        'ondragover' => 'onDragOver',
+        'ondragstart' => 'onDragStart',
+        'ondrop' => 'onDrop',
+        'onmousedown' => 'onMouseDown',
+        'onmouseenter' => 'onMouseEnter',
+        'onmouseleave' => 'onMouseLeave',
+        'onmousemove' => 'onMouseMove',
+        'onmouseout' => 'onMouseOut',
+        'onmouseover' => 'onMouseOver',
+        'onmouseup' => 'onMouseUp',
+        'onselect' => 'onSelect',
+        'ontouchcancel' => 'onTouchCancel',
+        'ontouchend' => 'onTouchEnd',
+        'ontouchmove' => 'onTouchMove',
+        'ontouchstart' => 'onTouchStart',
+        'onscroll' => 'onScroll',
+        'onwheel' => 'onWheel',
+        'onabort' => 'onAbort',
+        'oncanplay' => 'onCanPlay',
+        'oncanplaythrough' => 'onCanPlayThrough',
+        'ondurationchange' => 'onDurationChange',
+        'onemptied' => 'onEmptied',
+        'onencrypted' => 'onEncrypted',
+        'onended' => 'onEnded',
+        'onloadeddata' => 'onLoadedData',
+        'onloadedmetadata' => 'onLoadedMetadata',
+        'onloadstart' => 'onLoadStart',
+        'onpause' => 'onPause',
+        'onplay' => 'onPlay',
+        'onplaying' => 'onPlaying',
+        'onprogress' => 'onProgress',
+        'onratechange' => 'onRateChange',
+        'onseeked' => 'onSeeked',
+        'onseeking' => 'onSeeking',
+        'onstalled' => 'onStalled',
+        'onsuspend' => 'onSuspend',
+        'ontimeupdate' => 'onTimeUpdate',
+        'onvolumechange' => 'onVolumeChange',
+        'onwaiting' => 'onWaiting',
+        'onload' => 'onLoad',
+        'onerror' => 'onError',
+        'onanimationstart' => 'onAnimationStart',
+        'onanimationend' => 'onAnimationEnd',
+        'onanimationiteration' => 'onAnimationIteration',
+        'ontransitionend' => 'onTransitionEnd'
     ];
 
     public static function register()
@@ -105,42 +144,9 @@ class React {
     static function hyperscript(selector: Expr, attrs: Expr, children: Expr) {
         return macro helder.vdom.libraries.React.ReactExtern.createElement(
             $selector, 
-            ${switch attrs.expr {
-                case EConst(CIdent('null')) | EObjectDecl([]) | EBlock([]): attrs;
-                case EObjectDecl(fields):
-                    {expr: EObjectDecl([
-                        for (field in fields) {
-                            field: mapAttributeKey(field.field), 
-                            expr: field.expr
-                        }
-                    ]), pos: attrs.pos}
-                default: 
-                    macro @:privateAccess helder.vdom.libraries.React.mapAttributes($attrs);
-            }}, 
+            ${AttributeMapper.map(attrs, attrMap, macro helder.vdom.libraries.React.attrMap)},
             $children
         );
-    }
-
-    static function mapAttributes(attrs: DynamicAccess<Any>) {
-        var res: DynamicAccess<Any> = {};
-        for (key in attrs.keys()) 
-            res[mapAttributeKey(key)] = attrs[key];
-        return res;
-    }
-    
-    static function mapAttributeKey(name: String): String {
-        #if macro
-        if (name.substr(0, HAXE_KEY_PREFIX.length) == HAXE_KEY_PREFIX)
-            name = name.substr(HAXE_KEY_PREFIX.length);
-        #end
-        if (htmlAttrs.exists(name)) 
-            return htmlAttrs[name];
-        if (name.substr(0, 2) == 'on') {
-            var key = name.toLowerCase();
-            if (eventAttrs.exists(key))
-                return return eventAttrs[key]; 
-        }
-        return name;
     }
 
 }

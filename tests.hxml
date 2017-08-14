@@ -1,4 +1,4 @@
---macro helder.vdom.libraries.Mithril.register()
+--macro helder.vdom.libraries.React.register()
 -lib tink_csss
 -cp tests
 -dce full

@@ -47,12 +47,13 @@ class Hyperscript {
                 default:
                     switch Context.followWithAbstracts(Context.typeof(attrs)) {
                         case TAnonymous(_):
-                        default: 
+                        default:
                             children = attrs;
                             attrs = macro null;
                     }
             }
         }
+
         return switch selector.expr {
             case EConst(CString(source)):
                 var selector = parseSelector(source);
@@ -78,7 +79,9 @@ class Hyperscript {
                             case name: names.push(name);
                         }
                         function hasField(name) return names.indexOf(name) > -1;
-                        if (!hasField('id')) 
+                        if (selector.classes.length > 0 && !hasField('class')) 
+                            fields.push({field: 'class', expr: macro $v{selector.classes.join(' ')}});
+                        if (selector.id != null && !hasField('id')) 
                             fields.push({field: 'id', expr: macro $v{selector.id}});
                         for (attr in selector.attrs.keys())
                             if (!hasField(attr))
@@ -128,6 +131,7 @@ class Hyperscript {
                     selector.classes = classes;
                     for (attr in attrs) switch attr.operator {
                         case Exactly: selector.attrs[attr.name] = attr.value;
+                        case None if (attr.value == null): selector.attrs[attr.name] = 'true';
                         default: throw 'Unsupported operation';
                     }
                     selector;

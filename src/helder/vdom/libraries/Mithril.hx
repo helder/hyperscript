@@ -4,11 +4,14 @@ import helder.vdom.Hyperscript;
 import helder.vdom.Selector;
 import haxe.macro.Expr;
 
-@:native('m') #if !no_require @:jsRequire('mithril') #end
+#if !macro
+import helder.vdom.Selector;
+@:native('m') #if !no_require @:jsRequire('mithril/hyperscript') #end
 extern class MithrilExtern {
     @:selfCall
-    public static function m(selector: Selector, attrs: Dynamic, children: Dynamic): Dynamic;
+    public static function m<Attrs>(selector: Selector<Attrs>, attrs: Attrs, children: Dynamic): Dynamic;
 }
+#end
 
 class Mithril {
 

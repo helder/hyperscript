@@ -2,4 +2,4 @@ package helder.vdom;
 
 import haxe.extern.EitherType;
 
-typedef Selector = EitherType<String, Class<Dynamic>>;
+typedef Selector<Attrs> = EitherType<String, Class<Dynamic>>;
