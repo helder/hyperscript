@@ -1,5 +1,5 @@
-import helder.vdom.Hyperscript.h;
-import helder.vdom.View;
+import coconut.Hyperscript.h;
+import coconut.hyperscript.View;
 import haxe.macro.Expr;
 
 class Test extends View<{title: String}> {

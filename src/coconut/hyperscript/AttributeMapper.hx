@@ -1,4 +1,4 @@
-package helder.vdom;
+package coconut.hyperscript;
 
 import haxe.DynamicAccess;
 import haxe.macro.Expr;
@@ -19,7 +19,7 @@ class AttributeMapper {
                 ]), pos: attrs.pos}
             default: 
                 // Todo: We can check attrs expr type first and create an objectdecl based on that
-                macro @:privateAccess helder.vdom.AttributeMapper.mapRuntime($runtimeMap, $attrs);
+                macro @:privateAccess coconut.hyperscript.AttributeMapper.mapRuntime($runtimeMap, $attrs);
         }
     }
 

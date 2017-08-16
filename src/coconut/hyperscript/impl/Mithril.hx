@@ -1,11 +1,11 @@
-package helder.vdom.libraries;
+package coconut.hyperscript.impl;
 
-import helder.vdom.Hyperscript;
-import helder.vdom.Selector;
+import coconut.Hyperscript;
+import coconut.hyperscript.Selector;
 import haxe.macro.Expr;
 
 #if !macro
-import helder.vdom.Selector;
+import coconut.hyperscript.Selector;
 @:native('m') #if !no_require @:jsRequire('mithril/hyperscript') #end
 extern class MithrilExtern {
     @:selfCall
@@ -19,6 +19,6 @@ class Mithril {
         Hyperscript.register(hyperscript);
 
     static function hyperscript(selector: Expr, attrs: Expr, children: Expr)
-        return macro @:privateAccess helder.vdom.libraries.Mithril.MithrilExtern.m($selector, $attrs, $children);
+        return macro @:privateAccess coconut.hyperscript.libraries.Mithril.MithrilExtern.m($selector, $attrs, $children);
 
 }

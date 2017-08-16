@@ -1,4 +1,4 @@
-package helder.vdom;
+package coconut;
 
 import tink.csss.Selector;
 import tink.csss.Parser;
@@ -23,7 +23,7 @@ typedef Attr = {
 typedef Attrs = DynamicAccess<String>;
 
 typedef HyperscriptImpl = 
-    // selector: Expr -> attrs: Expr -> children: Expr -> Expr
+    // (selector: Expr, attrs: Expr, children: Expr) -> Expr
     Expr -> Expr -> Expr -> Expr;
 
 class Hyperscript {
@@ -49,7 +49,7 @@ class Hyperscript {
                         case TAnonymous(_):
                         default:
                             children = attrs;
-                            attrs = macro null;
+                            attrs = macro @:pos(attrs.pos) null;
                     }
             }
         }
@@ -61,14 +61,14 @@ class Hyperscript {
                     case EConst(CIdent('null')) | EObjectDecl([]) | EBlock([]):
                         var fields = [
                             for (attr in selector.attrs.keys())
-                                {field: attr, expr: macro $v{selector.attrs[attr]}}
+                                {field: attr, expr: macro @:pos(attrs.pos) $v{selector.attrs[attr]}}
                         ];
                         if (selector.id != null) 
-                            fields.push({field: 'id', expr: macro $v{selector.id}});
+                            fields.push({field: 'id', expr: macro @:pos(attrs.pos) $v{selector.id}});
                         if (selector.classes.length > 0)
-                            fields.push({field: 'class', expr: macro $v{selector.classes.join(' ')}});
+                            fields.push({field: 'class', expr: macro @:pos(attrs.pos) $v{selector.classes.join(' ')}});
                         var obj = {expr: EObjectDecl(fields), pos: attrs.pos}
-                        impl(macro $v{selector.tag}, obj, children);
+                        impl(macro @:pos(attrs.pos) $v{selector.tag}, obj, children);
                     case EObjectDecl(fields):
                         var names = [];
                         for (field in fields) switch field.field {
@@ -80,24 +80,24 @@ class Hyperscript {
                         }
                         function hasField(name) return names.indexOf(name) > -1;
                         if (selector.classes.length > 0 && !hasField('class')) 
-                            fields.push({field: 'class', expr: macro $v{selector.classes.join(' ')}});
+                            fields.push({field: 'class', expr: macro @:pos(attrs.pos) $v{selector.classes.join(' ')}});
                         if (selector.id != null && !hasField('id')) 
-                            fields.push({field: 'id', expr: macro $v{selector.id}});
+                            fields.push({field: 'id', expr: macro @:pos(attrs.pos) $v{selector.id}});
                         for (attr in selector.attrs.keys())
                             if (!hasField(attr))
-                                fields.push({field: attr, expr: macro $v{selector.attrs[attr]}});
+                                fields.push({field: attr, expr: macro @:pos(attrs.pos) $v{selector.attrs[attr]}});
                         var obj = {expr: EObjectDecl(fields), pos: attrs.pos}
-                        impl(macro $v{selector.tag}, obj, children);
+                        impl(macro @:pos(attrs.pos) $v{selector.tag}, obj, children);
                     default:
-                        var attrs = macro @:privateAccess helder.vdom.Hyperscript.merge($v{selector}, cast $attrs);
-                        impl(macro $v{selector.tag}, attrs, children);
+                        var attrs = macro @:pos(attrs.pos) @:privateAccess coconut.Hyperscript.merge($v{selector}, cast $attrs);
+                        impl(macro @:pos(attrs.pos) $v{selector.tag}, attrs, children);
                 }
             case EConst(CIdent(component)):
                 impl(selector, attrs, children);
             default:
                 macro @:privateAccess {
-                    var selector = helder.vdom.Hyperscript.parseSelector($selector),
-                        attrs = helder.vdom.Hyperscript.merge(selector, $attrs);
+                    var selector = coconut.Hyperscript.parseSelector($selector),
+                        attrs = coconut.Hyperscript.merge(selector, $attrs);
                     ${impl(macro selector, macro attrs, children)}
                 }
         }

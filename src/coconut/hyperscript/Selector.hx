@@ -1,4 +1,4 @@
-package helder.vdom;
+package coconut.hyperscript;
 
 import haxe.extern.EitherType;
 

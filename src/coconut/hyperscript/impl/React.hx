@@ -1,11 +1,11 @@
-package helder.vdom.libraries;
+package coconut.hyperscript.impl;
 
-import helder.vdom.Hyperscript;
-import helder.vdom.AttributeMapper;
+import coconut.Hyperscript;
+import coconut.hyperscript.AttributeMapper;
 import haxe.macro.Expr;
 
 #if !macro
-import helder.vdom.Selector;
+import coconut.hyperscript.Selector;
 @:native('React') #if !no_require @:jsRequire('react') #end
 extern class ReactExtern {
     public static function createElement<Attrs>(selector: Selector<Attrs>, attrs: Attrs, children: Dynamic): Dynamic;
@@ -142,9 +142,9 @@ class React {
         Hyperscript.register(hyperscript);
 
     static function hyperscript(selector: Expr, attrs: Expr, children: Expr) {
-        return macro helder.vdom.libraries.React.ReactExtern.createElement(
+        return macro coconut.hyperscript.libraries.React.ReactExtern.createElement(
             $selector, 
-            ${AttributeMapper.map(attrs, attrMap, macro helder.vdom.libraries.React.attrMap)},
+            ${AttributeMapper.map(attrs, attrMap, macro coconut.hyperscript.libraries.React.attrMap)},
             $children
         );
     }
