@@ -8,10 +8,9 @@ import haxe.macro.Context;
 using tink.MacroApi;
 using tink.CoreApi;
 
-@:require('js_virtual_dom')
+@:require('coconut.vdom')
 class VirtualDom {
 
-    static var child: ComplexType;
     static var options = coconut.ui.macros.HXX.options;
 
     public static function register()
@@ -23,11 +22,24 @@ class VirtualDom {
 
     static function hyperscript(selector: Expr, attrs: Expr, children: Expr) {
         var child = options.child;
-        return macro @:pos(selector.pos) vdom.VDom.h(
-            $selector,
-            ${AttributeMapper.map(attrs, attrMap, macro coconut.hyperscript.libraries.VirtualDom.attrMap)},
-            ($children: $child)
-        );
+        return switch selector.expr {
+            case EConst(CString(source)):
+                macro @:pos(selector.pos) vdom.VDom.h(
+                    $selector,
+                    ${AttributeMapper.map(attrs, attrMap, macro coconut.hyperscript.libraries.VirtualDom.attrMap)},
+                    ($children: $child)
+                );
+            case EConst(CIdent(component)):
+                switch component.definedType() {
+                    case None: throw selector.reject('Unknown type ${component}');
+                    case Some(_.reduce() => t):
+                        var path = component.asTypePath();
+                        macro (coconut.ui.tools.ViewCache.create(new $path($attrs)): $child);
+                }
+            default:
+                throw selector.reject('Selector is expected to be a string literal or Class<T>');
+        }
+        
     }
 
 }
