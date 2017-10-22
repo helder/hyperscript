@@ -1,5 +1,6 @@
---macro helder.vdom.libraries.VirtualDom.register()
 -lib tink_csss
+-lib tink_macro
+-cp src
 -cp tests
 -dce full
 -main RunTests
