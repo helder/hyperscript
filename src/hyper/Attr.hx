@@ -3,24 +3,21 @@ package hyper;
 // Source: https://github.com/back2dos/js-virtual-dom/blob/master/src/vdom/Attr.hx
 
 import js.html.*;
-
-using tink.CoreApi;
+import tink.core.Callback;
 
 abstract ClassName(String) to String from String {
-    
-    inline function new(s:String) this = s;
-    
-    @:op(A+B) public function add(that:ClassName) 
-        return new ClassName(switch [this, (that:String)] {
+
+    inline public function add(that:ClassName) 
+        return switch [this, (that:String)] {
             case [null, v] | [v, null]: v;
             case [a, b]: '$a $b';
-        });
+        }
 
-    @:from static function ofMap(parts:Map<String, Bool>)
-        return new ClassName(ofArray([for (c in parts.keys()) if (parts[c]) c]));
+    @:from inline static function ofMap(parts:Map<String, Bool>)
+        return ofArray([for (c in parts.keys()) if (parts[c]) c]);
     
-    @:from static function ofArray(parts:Array<String>) 
-        return new ClassName(parts.join(' '));
+    @:from inline static function ofArray(parts:Array<String>) 
+        return parts.join(' ');
 
 }
 

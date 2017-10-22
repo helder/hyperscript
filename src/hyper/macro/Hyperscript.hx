@@ -114,7 +114,7 @@ class Hyperscript {
           selector.classes = classes;
           for (attr in attrs) switch attr.operator {
             case Exactly: selector.attrs[attr.name] = macro @:pos(pos) $v{attr.value};
-            case None if (attr.value == null): selector.attrs[attr.name] = macro @:pos(pos) 'true';
+            case None if (attr.value == null): selector.attrs[attr.name] = macro @:pos(pos) true;
             default: throw 'Unsupported operation';
           }
           selector;

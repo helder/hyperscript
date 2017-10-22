@@ -36,7 +36,7 @@ class Attributes {
       }
     }
     fields.push({
-      name: 'className', expr: macro $v{classes.join(' ')}
+      name: 'className', expr: macro $v{add}
     });
   }
 
