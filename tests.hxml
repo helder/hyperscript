@@ -1,5 +1,7 @@
 -lib tink_csss
 -lib tink_macro
+-lib tink_unittest
+-lib deep_equal
 -cp src
 -cp tests
 -dce full

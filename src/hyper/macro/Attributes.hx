@@ -11,7 +11,20 @@ typedef Field = {name: String, expr: Expr}
 
 class Attributes {
 
+  static inline var HAXE_KEY_PREFIX = "@$__hx__";
   static var types: Map<Type, AttrTypes> = new Map();
+  static var alias = [
+    'class' => 'className',
+    'for' => 'htmlFor',
+    'tabindex' => 'tabIndex',
+    'accesskey' => 'accessKey',
+    'accesskeylabel' => 'accessKeyLabel',
+    'contenteditable' => 'contentEditable',
+    'colspan' => 'colSpan',
+    'rowspan' => 'rowSpan',
+    'allowfullscreen' => 'allowFullscreen',
+    'defaultselected' => 'defaultSelected'
+  ];
   
   var fields: Array<Field>;
   var type: AttrTypes;
@@ -19,7 +32,8 @@ class Attributes {
 
   public function new(fields, type, ?setup) {
     this.type = getType(type);
-    this.fields = fields;
+    this.fields = normalize(fields);
+    remapKeys(alias);
     this.setup = setup;
   }
 
@@ -38,6 +52,34 @@ class Attributes {
     fields.push({
       name: 'className', expr: macro $v{add}
     });
+  }
+
+  function normalize(fields: Array<Field>) {
+    var attributes = [], properties = [];
+    for (field in fields) {
+      if (alias.exists(field.name)) field.name = alias[field.name];
+      if (field.name.indexOf('-') > 0) attributes.push(field);
+      else properties.push(field);
+    }
+    if (attributes.length > 0)
+      properties.push({
+        name: 'attributes',
+        expr: EObjectDecl(attributes.map(function(field) {
+          var expr = field.expr;
+          return {field: field.name, expr: macro @:pos(expr.pos) ($expr: String)}
+        })).at(Context.currentPos())
+      });
+    return properties;
+  }
+
+  function remapKeys(map: Map<String, String>) {
+    for (field in fields) {
+      var key = field.name;
+      if (key.substr(0, HAXE_KEY_PREFIX.length) == HAXE_KEY_PREFIX)
+          key = key.substr(HAXE_KEY_PREFIX.length);
+      if (map.exists(key)) 
+        field.name = map[key];
+    }
   }
 
   function typeField(field: Field): Field {

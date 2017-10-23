@@ -24,11 +24,11 @@ typedef Children = Array<VNode>;
   @:noCompletion @:from static public function flatten(c: Children): VNode
     return cast c;
 
-  @:noCompletion @:from macro static public function fromVoid(e: ExprOf<Void>): ExprOf<VNode> {
+  /*@:noCompletion @:from macro static public function fromVoid(e: ExprOf<Void>): ExprOf<VNode> {
     return switch Context.getTypedExpr(Context.typeExpr(e)) {
       case macro if($e1) $e2: macro if($e1) $e2 else null;
       default: e.reject('Expr cannot be Void');
     }
-  }
+  }*/
 
 }

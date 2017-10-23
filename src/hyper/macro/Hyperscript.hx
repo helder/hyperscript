@@ -35,13 +35,13 @@ class Hyperscript {
           name: field.field, expr: field.expr
         }].concat(merge), type);
       case EBlock([]) | EConst(CIdent('null')):
-        new Attributes([], type);
+        new Attributes(merge, type);
       default: switch Context.followWithAbstracts(Context.typeof(expr)) {
         case TAnonymous(_.get().fields => fields):
           new Attributes([for (field in fields) {
             name: field.name, expr: '_attrs.${field.name}'.resolve()
           }].concat(merge), type, macro var _attrs = $expr);
-        default: throw 'assert';
+        default: expr.reject('Attributes must be of type anonymous');
       }
     }
   }
@@ -53,6 +53,7 @@ class Hyperscript {
       if (!isNull(attrs) && isNull(children))
         switch attrs.expr {
           case EObjectDecl(_): false;
+          case EArrayDecl(_): true;
           default: try {
             Context.typeof(macro ($attrs: hyper.VNode.Children));
             true;
@@ -68,6 +69,7 @@ class Hyperscript {
       childrenE = attrsE;
       attrsE = macro {};
     }
+    processChildren(childrenE);
     return switch selectorE.expr {
       case EConst(CString(source)):
         var selector = parseSelector(source, selectorE.pos);
@@ -97,6 +99,18 @@ class Hyperscript {
     }
   }
 
+  static function processChildren(children: Expr) {
+    function process(value: Expr)  switch value {
+      case macro for ($e1) $e2: value.expr = (macro [for($e1) $e2]).expr;
+      case macro if ($e1) $e2: value.expr = (macro if($e1) $e2 else null).expr;
+      default:
+    }
+    switch children.expr {
+      case EArrayDecl(values): values.map(process);
+      default: process(children);
+    }
+  }
+
   static function parseSelector(source: String, pos: Position): SelectorData {
     var selector: SelectorData = {
       tag: 'div', id: null, 
@@ -115,11 +129,11 @@ class Hyperscript {
           for (attr in attrs) switch attr.operator {
             case Exactly: selector.attrs[attr.name] = macro @:pos(pos) $v{attr.value};
             case None if (attr.value == null): selector.attrs[attr.name] = macro @:pos(pos) true;
-            default: throw 'Unsupported operation';
+            default: throw 'Unsupported operation at $pos';
           }
           selector;
         case []: selector;
-        default: throw 'Single selector expected';
+        default: throw 'Single selector expected at $pos';
       }
       case Failure(error): throw error;
     }
