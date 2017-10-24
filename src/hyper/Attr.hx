@@ -13,10 +13,10 @@ abstract ClassName(String) to String from String {
             case [a, b]: '$a $b';
         }
 
-    @:from inline static function ofMap(parts:Map<String, Bool>)
+    @:from inline static function ofMap(parts:Map<String, Bool>): ClassName
         return ofArray([for (c in parts.keys()) if (parts[c]) c]);
     
-    @:from inline static function ofArray(parts:Array<String>) 
+    @:from inline static function ofArray(parts:Array<String>): ClassName
         return parts.join(' ');
 
 }

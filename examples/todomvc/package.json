@@ -1,0 +1,32 @@
+{
+  "name": "examples-todomvc",
+  "version": "0.0.0",
+  "description": "TodoMVCoconut",
+  "main": "bin/index.html",
+  "bin": {
+    "examples-todomvc": "todomvc.js"
+  },
+  "dependencies": {
+    "haxeshim": "^0.9.0",
+    "less": "2.7.2",
+    "lix.pm": "^0.10.2",
+    "switchx": "^0.12.0"
+  },
+  "scripts": {
+    "postinstall": "switchx install && lix download",
+    "build": "haxe build.hxml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MVCoconut/examples-todomvc.git"
+  },
+  "keywords": [
+    "todomvc"
+  ],
+  "author": "back2dos",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MVCoconut/examples-todomvc/issues"
+  },
+  "homepage": "https://github.com/MVCoconut/examples-todomvc#readme"
+}

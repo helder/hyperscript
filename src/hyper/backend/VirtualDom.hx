@@ -1,45 +1,30 @@
-package coconut.hyperscript.impl;
+package hyper.backend;
 
-import coconut.Hyperscript;
-import coconut.hyperscript.Selector;
 import haxe.macro.Expr;
 import haxe.macro.Context;
+import haxe.macro.Type;
+import hyper.macro.Attributes;
 
 using tink.MacroApi;
 using tink.CoreApi;
 
-@:require('coconut.vdom')
-class VirtualDom {
+@:require('js_virtual_dom')
+class VirtualDom implements hyper.Backend {
 
-    static var options = coconut.ui.macros.HXX.options;
+  public function new() {}
 
-    public static function register()
-        Hyperscript.register(hyperscript);
-
-    public static var attrMap = [
-        'class' => 'className'
-    ];
-
-    static function hyperscript(selector: Expr, attrs: Expr, children: Expr) {
-        var child = options.child;
-        return switch selector.expr {
-            case EConst(CString(source)):
-                macro @:pos(selector.pos) vdom.VDom.h(
-                    $selector,
-                    ${AttributeMapper.map(attrs, attrMap, macro coconut.hyperscript.libraries.VirtualDom.attrMap)},
-                    ($children: $child)
-                );
-            case EConst(CIdent(component)):
-                switch component.definedType() {
-                    case None: throw selector.reject('Unknown type ${component}');
-                    case Some(_.reduce() => t):
-                        var path = component.asTypePath();
-                        macro (coconut.ui.tools.ViewCache.create(new $path($attrs)): $child);
-                }
-            default:
-                throw selector.reject('Selector is expected to be a string literal or Class<T>');
-        }
-        
+  public function createElement(tag: String, attr: Attributes, children: Option<Expr>): Expr {
+    var obj = attr.toObjectDecl(function (field) return field);
+    return switch children {
+      case Some(macro null) | None: 
+        macro (cast vdom.VDom.h($v{tag}, cast $obj): hyper.VNode);
+      case Some(c): 
+        macro (cast vdom.VDom.h($v{tag}, cast $obj, cast $c): hyper.VNode);
     }
+  }
+
+  public function createComponent(type: Type, attr: Expr, children: Expr): Expr {
+    throw 'Unsupported';
+  }
 
 }

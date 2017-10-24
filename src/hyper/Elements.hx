@@ -120,6 +120,7 @@ typedef InputAttr = {> AttrOf<InputElement>,
   @:optional var min(default, never):String;
   @:optional var step(default, never):String;
   @:optional var maxlength(default, never):Int;
+  @:optional var autofocus(default, never): Bool;
 }
 
 typedef TextAreaAttr = {> AttrOf<TextAreaElement>,

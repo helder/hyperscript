@@ -1,0 +1,9 @@
+-cp ../../src
+-lib coconut.ui
+-lib coconut.vdom
+-lib coconut.data
+-lib lessie
+-cp src
+-dce full
+-main TodoMvc
+-js dist/todomvc.js

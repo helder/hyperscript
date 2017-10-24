@@ -1,22 +1,11 @@
 package hyper;
 
 import haxe.macro.Expr;
-import haxe.macro.Context;
+import haxe.macro.Type;
 import hyper.macro.Attributes;
+import haxe.ds.Option;
 
-using tink.MacroApi;
-
-class Backend {
-
-  public function new() {}
-
-  public function createElement(tag: String, attr: Attributes, children: Expr) {
-    var obj = attr.toObjectDecl(function (field) {
-      return field;
-    });
-    return macro (cast {
-      tag: $v{tag}, attr: $obj, children: $children
-    }: hyper.VNode);
-  }
-
+interface Backend {
+  function createElement(tag: String, attr: Attributes, children: Option<Expr>): Expr;
+  function createComponent(type: Type, attr: Expr, children: Expr): Expr;
 }

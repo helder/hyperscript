@@ -17,7 +17,11 @@ typedef SelectorData = {
 
 class Hyperscript {
 
-  static var backend = new hyper.Backend();
+  public static var backend: Backend = 
+    #if js_virtual_dom
+      #if coconut_ui new hyper.backend.coconut.VirtualDom()
+      #else new hyper.backend.VirtualDom() #end
+    #else null #end;
 
   static var dom = switch Context.follow(Context.getType('hyper.Elements')) {
     case TAnonymous(_.get().fields => fields):
@@ -54,12 +58,11 @@ class Hyperscript {
         switch attrs.expr {
           case EObjectDecl(_): false;
           case EArrayDecl(_): true;
-          default: try {
-            Context.typeof(macro ($attrs: hyper.VNode.Children));
-            true;
-          } catch(e: Dynamic) {
-            false;
-          }
+          default:
+            switch Context.followWithAbstracts(Context.typeof(attrs)) {
+              case TAnonymous(_): false;
+              default: true;
+            }
         }
       else false;
   }
@@ -85,29 +88,33 @@ class Hyperscript {
         var attrs = getAttr(attrsE, merge, type);
         if (selector.classes.length > 0)
           attrs.addClasses(selector.classes);
-        if (!element.hasChildren) switch childrenE.expr {
-          case EConst(CIdent('null')):
+        if (!element.hasChildren) switch childrenE {
+          case macro null:
           default: childrenE.reject('Element ${selector.tag} cannot contain children');
         }
         return backend.createElement(selector.tag, attrs, 
-          if (element.hasChildren) macro @:pos(childrenE.pos) ($childrenE: hyper.VNode.Children)
-          else macro null
+          if (element.hasChildren) switch childrenE {
+            case macro null: Some(childrenE);
+            default: Some(macro @:pos(childrenE.pos) ($childrenE: hyper.VNode.Children));
+          } else None
         );
       default: 
-        trace(selectorE);
-        throw 'todo';
+        var type = Context.getType(selectorE.toString());
+        return backend.createComponent(type, attrsE, childrenE);
     }
   }
 
   static function processChildren(children: Expr) {
-    function process(value: Expr)  switch value {
-      case macro for ($e1) $e2: value.expr = (macro [for($e1) $e2]).expr;
-      case macro if ($e1) $e2: value.expr = (macro if($e1) $e2 else null).expr;
-      default:
+    function process(expr: Expr) return switch expr {
+      case macro for ($e1) $e2: macro ([for($e1) $e2]: hyper.VNode);
+      case macro if ($e1) $e2: macro (if($e1) $e2 else null: hyper.VNode);
+      default: macro ($expr: hyper.VNode);
     }
     switch children.expr {
-      case EArrayDecl(values): values.map(process);
-      default: process(children);
+      case EArrayDecl(values): 
+        children.expr = EArrayDecl(values.map(process));
+        //values.map(process);
+      default: // process(children);
     }
   }
 

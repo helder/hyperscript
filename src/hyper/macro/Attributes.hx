@@ -3,6 +3,7 @@ package hyper.macro;
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.Type;
+import tink.macro.TypeMap;
 
 using tink.MacroApi;
 
@@ -12,7 +13,7 @@ typedef Field = {name: String, expr: Expr}
 class Attributes {
 
   static inline var HAXE_KEY_PREFIX = "@$__hx__";
-  static var types: Map<Type, AttrTypes> = new Map();
+  static var types = new TypeMap<AttrTypes>();
   static var alias = [
     'class' => 'className',
     'for' => 'htmlFor',
@@ -66,7 +67,7 @@ class Attributes {
         name: 'attributes',
         expr: EObjectDecl(attributes.map(function(field) {
           var expr = field.expr;
-          return {field: field.name, expr: macro @:pos(expr.pos) ($expr: String)}
+          return {field: field.name, expr: macro @:pos(expr.pos) ($expr: hyper.Attr.Ext)}
         })).at(Context.currentPos())
       });
     return properties;
@@ -100,12 +101,13 @@ class Attributes {
   }
 
   function getType(type: Type) {
-    if (types.exists(type)) return types[type];
-    return types[type] = switch Context.follow(type) {
-      case TAnonymous(_.get().fields => fields):
-        types[type] = [for (field in fields) field.name => field.type.toComplex()];
-      default: throw 'assert';
-    }
+    if (!types.exists(type))
+      types.set(type, switch Context.follow(type) {
+        case TAnonymous(_.get().fields => fields):
+          [for (field in fields) field.name => field.type.toComplex()];
+        default: throw 'assert';
+      });
+     return types.get(type);
   }
 
 }
