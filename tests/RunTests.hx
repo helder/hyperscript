@@ -89,6 +89,26 @@ class SelectorTest {
     return asserts.done();
   }
 
+  public function addRuntimeClasses() {
+    var runtimeClass = 'c-'+Math.random();
+    asserts.assert(h('div.a.b', {'class': runtimeClass}).is({tag: 'div', attr: {className: 'a b '+runtimeClass}}));
+    return asserts.done();
+  }
+
+  public function attributes() {
+    var click = e -> null;
+    asserts.assert(h('div', {
+      onclick: click
+    }).is({tag: 'div', attr: {onclick: click}}));
+    asserts.assert(h('div[data-test=123]').is({
+      tag: 'div', 
+      attr: {
+        attributes: {'data-test': '123'}
+      }
+    }));
+    return asserts.done();
+  }
+
   public function parseAttrs() {
     asserts.assert(h('div[hidden]').is({tag: 'div', attr: {hidden: true}}));
     asserts.assert(h('div[id=test]').is({tag: 'div', attr: {id: 'test'}}));

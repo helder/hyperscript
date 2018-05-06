@@ -6,7 +6,7 @@ import haxe.macro.Expr;
 
 class Script {
 
-  macro public static function h(selector: ExprOf<String>, ?attr: ExprOf<Attr>, ?children: ExprOf<Array<VNode>>): ExprOf<VNode>
+  macro public static function h(selector: Expr, ?attr: Expr, ?children: ExprOf<Array<VNode>>): ExprOf<VNode>
     return hyper.macro.Hyperscript.call(selector, attr, children);
 
 }

@@ -20,12 +20,12 @@ class TodoItemView extends View<{ item: TodoItem, ondeleted: TodoItem->Void }> {
     return h('li.todo-item', {'data-completed': item.completed, 'data-editing': isEditing}, [
       h('input[name=completed][type=checkbox]', {
         checked: item.completed, 
-        onchange: e -> item.completed = e.target.checked
+        onchange: e -> item.completed = e.currentTarget.checked
       }),
       if (isEditing) [
         h('input[name=description][type=text]', {
           value: item.description,
-          onchange: e -> edit(e.target.value),
+          onchange: e -> edit(e.currentTarget.value),
           onblur: e -> isEditing = false
         })
       ] else [

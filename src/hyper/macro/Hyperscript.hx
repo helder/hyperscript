@@ -23,14 +23,37 @@ class Hyperscript {
       #else new hyper.backend.VirtualDom() #end
     #else null #end;
 
-  static var dom = switch Context.follow(Context.getType('hyper.Elements')) {
-    case TAnonymous(_.get().fields => fields):
-      [for (field in fields) field.name => {
-        type: field.type,
-        hasChildren: !field.meta.has(':noChildren')
-      }];
+  static function tagType(field) return switch field.type {
+    case TType(_.get() => { module: 'tink.domspec.Attributes', name: name }, _): 
+      var html = 'js.html.' + (switch name.split('Attr') {
+        case ['Global', '']: '';
+        case [name, '']: name;
+        default: throw 'assert';
+      }) + 'Element';
+      var ct = html.asComplexType();
+      (macro @:pos(field.pos) (null:$ct)).typeof().sure();
     default: throw 'assert';
   }
+
+  static var dom = [
+    for (kind in Context.getType('tink.domspec.Tags').getFields().sure())
+      for (field in kind.type.getFields().sure())
+        field.name => {
+          type: TExtend([
+            field.type.toComplex().toString().asTypePath(),
+            {
+              pack: ['tink', 'domspec'],
+              name: 'Events',
+              params: [TPType(tagType(field).toComplex())]
+            }
+          ], [{
+            name: 'attributes', 
+            kind: FVar((macro: haxe.DynamicAccess<String>)),
+            pos: Context.currentPos()
+          }]).toType().sure(),
+          hasChildren: kind.name == 'normal' // Todo: fix opaque
+        }
+  ];
   
   static function getAttr(expr: Expr, merge: Array<{name: String, expr: Expr}>, type: Type): Attributes {
     return switch expr.expr {

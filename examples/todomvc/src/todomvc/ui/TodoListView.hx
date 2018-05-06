@@ -13,9 +13,9 @@ class TodoListView extends View<{todos:TodoList, filter:TodoFilter}> {
         h('input[type=text][autofocus]', {
           placeholder: 'What needs to be done?',
           onkeypress: function (e) {
-            if (e.keyCode != KeyboardEvent.DOM_VK_RETURN || e.target.value == '') return;
-            todos.add(e.target.value); 
-            e.target.value = '';
+            if (e.keyCode != KeyboardEvent.DOM_VK_RETURN || e.currentTarget.value == '') return;
+            todos.add(e.currentTarget.value); 
+            e.currentTarget.value = '';
           }
         }),
         if (todos.items.length > 0)

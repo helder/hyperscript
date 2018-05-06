@@ -45,7 +45,7 @@ class Attributes {
         var old = field.expr;
         field.expr = switch old.expr {
           case EConst(CString(str)): macro $v{add+' '+str};
-          default: macro $v{add} + ' ' + ($old: hyper.Attr.ClassName);
+          default: macro $v{add} + ' ' + ($old: tink.domspec.ClassName);
         }
         return;
       }
@@ -67,7 +67,7 @@ class Attributes {
         name: 'attributes',
         expr: EObjectDecl(attributes.map(function(field) {
           var expr = field.expr;
-          return {field: field.name, expr: macro @:pos(expr.pos) ($expr: hyper.Attr.Ext)}
+          return cast {field: field.name, expr: macro @:pos(expr.pos) ($expr: hyper.Attr.Ext)}
         })).at(Context.currentPos())
       });
     return properties;
@@ -91,10 +91,15 @@ class Attributes {
     return {name: field.name, expr: macro @:pos(expr.pos) ($expr: $typed)}
   }
 
+  function toObjectField(field) {
+    // Todo: deal with haxe 4 changes ... (ObjectField)
+    return cast {field: field.name, expr: field.expr}
+  }
+
   public function toObjectDecl(map: Field -> Field) {
-    var decl = EObjectDecl(fields.map(typeField).map(map).map(function(field) {
-      return {field: field.name, expr: field.expr}
-    })).at(Context.currentPos());
+    var decl = 
+      EObjectDecl(fields.map(typeField).map(map).map(toObjectField))
+      .at(Context.currentPos());
     return 
       if (setup == null) decl
       else macro @:pos(decl.pos) {$setup; $decl;}

@@ -8,7 +8,7 @@ import hyper.macro.Attributes;
 using tink.MacroApi;
 using tink.CoreApi;
 
-@:require('js_virtual_dom')
+@:require('mithril')
 class VirtualDom implements hyper.Backend {
 
   public function new() {}

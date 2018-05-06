@@ -23,10 +23,10 @@ abstract Children(Array<VNode>) from Array<VNode> {
   @:from static inline function ofInt(i: Int): VNode 
     return ofString(Std.string(i));
 
-  @:to function toChildren(): Children
+  @:to inline function toChildren(): Children
     return cast this;
 
-  @:noCompletion @:from static public function flatten(c: Array<VNode>): VNode
+  @:noCompletion @:from inline static public function flatten(c: Array<VNode>): VNode
     return cast c;
 
   #if js_virtual_dom
