@@ -1,8 +1,8 @@
-package hyper;
+package helder.hyperscript;
 
 import haxe.macro.Expr;
 import haxe.macro.Type;
-import hyper.macro.Attributes;
+import helder.hyperscript.macro.Attributes;
 import haxe.ds.Option;
 
 interface Backend {

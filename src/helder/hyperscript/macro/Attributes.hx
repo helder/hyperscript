@@ -1,4 +1,4 @@
-package hyper.macro;
+package helder.hyperscript.macro;
 
 import haxe.macro.Expr;
 import haxe.macro.Context;
@@ -67,7 +67,7 @@ class Attributes {
         name: 'attributes',
         expr: EObjectDecl(attributes.map(function(field) {
           var expr = field.expr;
-          return cast {field: field.name, expr: macro @:pos(expr.pos) ($expr: hyper.Attr.Ext)}
+          return cast {field: field.name, expr: macro @:pos(expr.pos) ($expr: helder.hyperscript.Attr.Ext)}
         })).at(Context.currentPos())
       });
     return properties;

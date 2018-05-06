@@ -1,4 +1,4 @@
-package hyper.macro;
+package helder.hyperscript.macro;
 
 import tink.csss.Parser;
 import haxe.macro.Context;
@@ -19,8 +19,8 @@ class Hyperscript {
 
   public static var backend: Backend = 
     #if js_virtual_dom
-      #if coconut_ui new hyper.backend.coconut.VirtualDom()
-      #else new hyper.backend.VirtualDom() #end
+      #if coconut_ui new helder.hyperscript.backend.coconut.VirtualDom()
+      #else new helder.hyperscript.backend.VirtualDom() #end
     #else null #end;
 
   static function tagType(field) return switch field.type {
@@ -118,7 +118,7 @@ class Hyperscript {
         return backend.createElement(selector.tag, attrs, 
           if (element.hasChildren) switch childrenE {
             case macro null: Some(childrenE);
-            default: Some(macro @:pos(childrenE.pos) ($childrenE: hyper.VNode.Children));
+            default: Some(macro @:pos(childrenE.pos) ($childrenE: helder.hyperscript.VNode.Children));
           } else None
         );
       default: 
@@ -129,9 +129,9 @@ class Hyperscript {
 
   static function processChildren(children: Expr) {
     function process(expr: Expr) return switch expr {
-      case macro for ($e1) $e2: macro ([for($e1) $e2]: hyper.VNode);
-      case macro if ($e1) $e2: macro (if($e1) $e2 else null: hyper.VNode);
-      default: macro ($expr: hyper.VNode);
+      case macro for ($e1) $e2: macro ([for($e1) $e2]: helder.hyperscript.VNode);
+      case macro if ($e1) $e2: macro (if($e1) $e2 else null: helder.hyperscript.VNode);
+      default: macro ($expr: helder.hyperscript.VNode);
     }
     switch children.expr {
       case EArrayDecl(values): 

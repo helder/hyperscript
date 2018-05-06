@@ -1,4 +1,4 @@
-package hyper;
+package helder.hyperscript;
 
 abstract Children(Array<VNode>) from Array<VNode> {
 

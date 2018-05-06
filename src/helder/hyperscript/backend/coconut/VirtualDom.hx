@@ -1,4 +1,4 @@
-package hyper.backend.coconut;
+package helder.hyperscript.backend.coconut;
 
 import haxe.macro.Type;
 import haxe.macro.Expr;
@@ -6,7 +6,7 @@ import haxe.macro.Expr;
 using tink.MacroApi;
 
 @:require('coconut.ui')
-class VirtualDom extends hyper.backend.VirtualDom {
+class VirtualDom extends helder.hyperscript.backend.VirtualDom {
 
   static var options = coconut.ui.macros.HXX.options;
 

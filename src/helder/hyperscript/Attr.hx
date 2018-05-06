@@ -1,4 +1,4 @@
-package hyper;
+package helder.hyperscript;
 
 abstract Ext(String) from String to String {  
   @:from static inline function ofInt(i:Int):Ext

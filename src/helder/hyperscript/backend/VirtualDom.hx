@@ -1,22 +1,15 @@
-package hyper.backend;
+package helder.hyperscript.backend;
 
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.Type;
-import hyper.macro.Attributes;
+import helder.hyperscript.macro.Attributes;
 
 using tink.MacroApi;
 using tink.CoreApi;
 
-#if !macro
-@:native('m') #if !no_require @:jsRequire('mithril/hyperscript') #end
-extern class MithrilExtern {
-    @:selfCall
-    public static function m(selector: Dynamic, attrs: Dynamic, children: Dynamic): Dynamic;
-}
-#end
-
-class Mithril implements hyper.Backend {
+@:require('js-virtual-dom')
+class VirtualDom implements helder.hyperscript.Backend {
 
   public function new() {}
 
@@ -24,9 +17,9 @@ class Mithril implements hyper.Backend {
     var obj = attr.toObjectDecl(function (field) return field);
     return switch children {
       case Some(macro null) | None: 
-        macro (cast hyper.backend.MithrilExtern.m($v{tag}, cast $obj): hyper.VNode);
+        macro (cast vdom.VDom.h($v{tag}, cast $obj): helder.hyperscript.VNode);
       case Some(c): 
-        macro (cast hyper.backend.MithrilExtern.m($v{tag}, cast $obj, cast $c): hyper.VNode);
+        macro (cast vdom.VDom.h($v{tag}, cast $obj, cast $c): helder.hyperscript.VNode);
     }
   }
 

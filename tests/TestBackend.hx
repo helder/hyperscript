@@ -1,16 +1,16 @@
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.Type;
-import hyper.macro.Attributes;
+import helder.hyperscript.macro.Attributes;
 
 using tink.CoreApi;
 using tink.MacroApi;
 
-class TestBackend implements hyper.Backend {
+class TestBackend implements helder.hyperscript.Backend {
 
   function new() {}
 
-  static function setup() hyper.macro.Hyperscript.backend = new TestBackend();
+  static function setup() helder.hyperscript.macro.Hyperscript.backend = new TestBackend();
 
   public function createElement(tag: String, attr: Attributes, children: Option<Expr>): Expr {
     var obj = attr.toObjectDecl(function (field) {
@@ -18,9 +18,9 @@ class TestBackend implements hyper.Backend {
     });
     return switch children {
       case Some(macro null) | None: 
-        macro (cast {tag: $v{tag}, attr: $obj}: hyper.VNode);
+        macro (cast {tag: $v{tag}, attr: $obj}: helder.hyperscript.VNode);
       case Some(c): 
-        macro (cast {tag: $v{tag}, attr: $obj, children: $c}: hyper.VNode);
+        macro (cast {tag: $v{tag}, attr: $obj, children: $c}: helder.hyperscript.VNode);
     }
   }
 

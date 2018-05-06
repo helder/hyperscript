@@ -2,8 +2,8 @@ import tink.unit.*;
 import tink.unit.Assert.*;
 import tink.testrunner.*;
 import deepequal.DeepEqual;
-import hyper.Script.h;
-import hyper.VNode;
+import helder.Hyperscript.h;
+import helder.hyperscript.VNode;
 
 using RunTests.VNodeCompare;
 

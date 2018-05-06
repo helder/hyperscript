@@ -1,4 +1,4 @@
-package hyper.backend;
+package helder.hyperscript.backend;
 
 import haxe.macro.Expr;
 
