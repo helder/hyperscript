@@ -2,6 +2,13 @@
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
     "haxe.displayConfigurations": [
-        ["tests.hxml"]
-    ]
+        ["tests.hxml", "-js", "dummy"]
+    ],
+    "haxe.executable": {
+        "path": "./node_modules/.bin/haxe",
+        "windows": {
+            "path": "./node_modules/.bin/haxe.cmd"
+        }
+    },
+    "files.eol": "\n"
 }

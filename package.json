@@ -1,0 +1,14 @@
+{
+  "name": "hyperscript",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/benmerckx/hyperscript.git",
+  "author": "Ben Merckx <ben@codeurs.be>",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "lix download"
+  },
+  "devDependencies": {
+    "lix": "^15.2.0-alpha.2"
+  }
+}
