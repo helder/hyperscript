@@ -1,0 +1,16 @@
+{
+  "name": "hyperscript",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/benmerckx/hyperscript.git",
+  "author": "Ben Merckx <ben@codeurs.be>",
+  "license": "MIT",
+  "scripts": {
+    "test": "lix run travix node",
+    "expose": "haxe ext.hxml",
+    "examples": "cd examples/todomvc && haxe build.hxml"
+  },
+  "devDependencies": {
+    "lix": "^15.2.0-alpha"
+  }
+}

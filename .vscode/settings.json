@@ -3,5 +3,11 @@
     "editor.tabSize": 2,
     "haxe.displayConfigurations": [
         ["tests.hxml"]
-    ]
+    ],
+    "haxe.executable": {
+        "path": "node_modules/.bin/haxe",
+        "windows": {
+            "path": "node_modules/.bin/haxe.cmd"
+        }
+    }
 }

@@ -4,7 +4,6 @@ import tink.csss.Parser;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Type;
-using haxe.macro.TypeTools;
 
 using tink.MacroApi;
 
@@ -21,6 +20,8 @@ class Hyperscript {
     #if js_virtual_dom
       #if coconut_ui new helder.hyperscript.backend.coconut.VirtualDom()
       #else new helder.hyperscript.backend.VirtualDom() #end
+    #elseif mithril
+      new helder.hyperscript.backend.Mithril()
     #else null #end;
 
   static function tagType(field) return switch field.type {
@@ -91,6 +92,7 @@ class Hyperscript {
   }
 
   public static function call(selectorE: Expr, ?attrsE: Expr, ?childrenE: Expr): Expr {
+    if (backend == null) selectorE.pos.error('No virtual dom backend selected');
     if (switchAttrsChildren(attrsE, childrenE)) {
       childrenE = attrsE;
       attrsE = macro {};

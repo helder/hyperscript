@@ -1,10 +1,10 @@
---macro TestBackend.setup()
 -lib tink_csss
 -lib tink_macro
 -lib tink_domspec
 -lib tink_unittest
 -lib deep_equal
+-D mithril
 -cp src
 -cp tests
--dce full
+#-dce full
 -main RunTests
