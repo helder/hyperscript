@@ -1,9 +1,10 @@
 import helder.vdom.Component;
 import tink.unit.Assert.assert;
+import sub.SubComponent;
 
 class MyComponent extends Component {
   function render() {
-    return h(Sub, {attr: true});
+    return h('.abc', {attr: true});
   }
 }
 
@@ -17,7 +18,7 @@ class TestComponent {
   public function new() {}
 
   public function testCreation() {
-    trace(@:privateAccess new MyComponent(null).render());
+    trace(@:privateAccess new SubComponent(null).view());
     return assert(true);
   }
 }

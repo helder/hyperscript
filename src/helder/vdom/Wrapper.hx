@@ -3,6 +3,7 @@ package helder.vdom;
 class WrapperBase<RenderResult, Props: {}, State: {}> {
   var props: Props;
   var state: State;
+  public function new() {}
   function onInit() {}
   function onCreate() {}
   function onUpdate() {}

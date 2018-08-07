@@ -11,6 +11,9 @@ class ComponentBuilder {
   static var wrapper = 
     #if mithril 'helder.vdom.wrapper.MithrilWrapper'
     #else throw 'No virtual dom libary selected' #end;
+  static var base = 
+    #if mithril 'helder.vdom.wrapper.MithrilWrapper.MithrilBase'
+    #else throw 'No virtual dom libary selected' #end;
   static var object = (macro: {}).toType().sure();
   
   static function build()
@@ -29,33 +32,39 @@ class ComponentBuilder {
     }
 
   static function buildClass(): Array<Field> {
-    return ClassBuilder.run([function (c: ClassBuilder) {
-      var fields = Context.getBuildFields();
-      var module = Context.getLocalModule().asTypePath();
-      var name = c.target.name;
-      var meta = c.target.meta;
-      meta.remove(':build');
-      var superType = c.target.superClass;
-      var superModule = superType.t.get();
-      var superDef = {
-        name: superModule.name,
-        pack: superModule.pack,
-        //sub: superModule.name == superModule.module ? null: superModule.name,
-        params: superType.params.map(function (param)
-          return TPType(param.toComplex())
-        )
-      }
-      trace(superDef);
-      var definition: TypeDefinition = {
-        pack: [],//Context.getLocalModule().split('.'),
-        name: '${name}_Impl',
-        pos: Context.currentPos(),
-        meta: meta.get(),
-        kind: TDClass(superDef, [], false),
-        fields: fields
-      }
-      Context.defineType(definition);
-      trace(definition.pack);
-    }]);
+    trace(Context.getLocalImports());
+    var target = Context.getLocalClass().get();
+    var fields = Context.getBuildFields();
+    var name = target.name;
+    var meta = target.meta;
+    meta.remove(':build');
+    meta.remove(':autoBuild');
+    var superType = target.superClass;
+    var superModule = superType.t.get();
+    var superPath = base.asTypePath();
+    superPath.params = superType.params.map(function (param)
+      return TPType(param.toComplex())
+    );
+    var impl = '${name}_Impl';
+    var baseBuilder = new ClassBuilder(target, fields);
+    baseBuilder.addMembers(macro class {
+      // Todo: type this somehow
+      override inline function doRender() return cast render();
+    });
+    var definition: TypeDefinition = {
+      pack: target.pack,
+      name: impl,
+      pos: Context.currentPos(),
+      meta: meta.get(),
+      kind: TDClass(superPath, [], false),
+      fields: baseBuilder.export()
+    }
+    Context.defineType(definition);
+    var builder = new ClassBuilder(target, []);
+    var path = impl.asTypePath();
+    builder.addMembers(macro class {
+      override function getInstance() return new $path();
+    });
+    return builder.export();
   }
 }

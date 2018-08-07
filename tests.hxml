@@ -6,5 +6,5 @@
 -D mithril
 -cp src
 -cp tests
-#-dce full
+-dce full
 -main RunTests

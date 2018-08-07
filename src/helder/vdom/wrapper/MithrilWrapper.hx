@@ -20,7 +20,7 @@ class MithrilBase<Props: {}, State: {}> extends WrapperBase<Props, State, Dynami
       case Success(selector): 
         trace(selector);
       default: 
-        var type = Context.getType(selector.toString());
+        //var type = Context.getType(selector.toString());
         return selector;
     }
     return macro 'root comp';
@@ -28,11 +28,12 @@ class MithrilBase<Props: {}, State: {}> extends WrapperBase<Props, State, Dynami
 }
 
 @:autoBuild(helder.vdom.macro.ComponentBuilder.buildClass())
+@:access(helder.vdom.wrapper.MithrilBase)
 class MithrilWrapper<Props: {}, State: {}> {
   var instance: MithrilBase<Props, State>;
 
   public function new(vnode) {
-    props = vnode.attrs;
+    //props = vnode.attrs;
     instance = getInstance();
   }
 
@@ -41,11 +42,11 @@ class MithrilWrapper<Props: {}, State: {}> {
 
   @:keep function oninit() instance.onInit();
   @:keep function oncreate(vnode) {
-    props = vnode.attrs;
+    //props = vnode.attrs;
     return instance.onCreate();
   }
   @:keep function onupdate() instance.onUpdate();
   @:keep function onremove() instance.onRemove();
-  @:keep function view() instance.doRender();
+  @:keep function view() return instance.doRender();
 
 }
