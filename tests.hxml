@@ -3,7 +3,7 @@
 -lib tink_domspec
 -lib tink_unittest
 -lib deep_equal
--D mithril
+-D react
 -cp src
 -cp tests
 -dce full

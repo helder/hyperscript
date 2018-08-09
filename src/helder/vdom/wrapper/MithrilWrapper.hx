@@ -14,7 +14,15 @@ import haxe.macro.Context;
 using tink.MacroApi;
 #end
 
-class MithrilBase<Props: {}, State: {}> extends WrapperBase<Props, State, Dynamic> {
+//@:autoBuild(helder.vdom.wrapper.MithrilWrapper.build())
+class MithrilWrapper<Props: {}, State: {}> {
+  var props: Props;
+  var state: State;
+
+  public function new(vnode) {
+    props = vnode.props;
+  }
+
   macro function h(ethis: Expr, selector: Expr, ?attrs: Expr, ?children: Array<Expr>) {
     switch selector.getString() {
       case Success(selector): 
@@ -25,28 +33,29 @@ class MithrilBase<Props: {}, State: {}> extends WrapperBase<Props, State, Dynami
     }
     return macro 'root comp';
   }
-}
 
-@:autoBuild(helder.vdom.macro.ComponentBuilder.buildClass())
-@:access(helder.vdom.wrapper.MithrilBase)
-class MithrilWrapper<Props: {}, State: {}> {
-  var instance: MithrilBase<Props, State>;
-
-  public function new(vnode) {
-    //props = vnode.attrs;
-    instance = getInstance();
+  #if !macro
+  @:keep function oninit(vnode) {
+    props = vnode.props;
+    onInit();
   }
-
-  function getInstance(): MithrilBase<Props, State>
-    throw 'implement';
-
-  @:keep function oninit() instance.onInit();
   @:keep function oncreate(vnode) {
-    //props = vnode.attrs;
-    return instance.onCreate();
+    props = vnode.props;
+    onCreate(vnode.dom);
   }
-  @:keep function onupdate() instance.onUpdate();
-  @:keep function onremove() instance.onRemove();
-  @:keep function view() return instance.doRender();
+  @:keep function onupdate(vnode) {
+    props = vnode.props;
+    onUpdate(vnode.dom);
+  }
+  @:keep function onremove() onRemove();
+  @:keep function view(vnode) {
+    props = vnode.props;
+    return untyped this.render();
+  }
 
+  function onInit() {}
+  function onCreate(element: js.html.Element) {}
+  function onUpdate(element: js.html.Element) {}
+  function onRemove() {}
+  #end
 }
