@@ -8,7 +8,7 @@ using tink.MacroApi;
 #end
 
 @:native('m') #if !no_require @:jsRequire('mithril/hyperscript') #end
-extern class MithrilExtern {
+extern class MithrilHyperscript {
   @:selfCall
   public static function m(selector: Dynamic, attrs: Dynamic, ?children: Dynamic): Dynamic;
 }
@@ -20,9 +20,21 @@ class MithrilWrapper<Props: {}, State: {}> {
   public function new(vnode)
     props = vnode.props;
 
-  macro function h(ethis: Expr, selector: Expr, ?attrs: Expr, ?children: Array<Expr>) {
-    parser.parse(selector, attrs, children);
-    return macro null;
+  macro function h(ethis: Expr, selector: Expr, extra: Array<Expr>) {
+    return switch parser.parse(selector, extra) {
+      case Element(tag, attributes, children):
+        macro helder.vdom.wrapper.MithrilWrapper.MithrilHyperscript.m(
+          $v{tag}, 
+          ${attributes.toObjectDecl()},
+          $a{children}
+        );
+      case Component(selector, props, children):
+        macro helder.vdom.wrapper.MithrilWrapper.MithrilHyperscript.m(
+          $selector,
+          $props,
+          $a{children}
+        );
+    }
   }
 
   #if macro

@@ -2,14 +2,15 @@ package helder.hyperscript;
 
 import haxe.macro.Expr;
 import tink.csss.Parser in SelectorParser;
+import haxe.macro.Type;
+import helder.hyperscript.Attributes;
+
 using haxe.macro.Context;
 using tink.MacroApi;
 
-typedef Attributes = Dynamic;
-
 enum HyperscriptCall {
-  Element(tag: String, attributes: Attributes, children: Expr);
-  Component(component: Expr, props: Expr, children: Expr);
+  Element(tag: String, attributes: Attributes, children: Array<Expr>);
+  Component(component: Expr, props: Expr, children: Array<Expr>);
 }
 
 typedef Selector = {
@@ -29,7 +30,7 @@ class Parser {
             {
               pack: ['tink', 'domspec'],
               name: 'Events',
-              params: [TPType(tagType(field).toComplex())]
+              params: [TPType(elementType(field).toComplex())]
             }
           ], [{
             name: 'attributes', 
@@ -40,22 +41,63 @@ class Parser {
         }
   ];
 
+  static function elementType(field) 
+    return switch field.type {
+      case TType(_.get() => {module: 'tink.domspec.Attributes', name: name}, _): 
+        var html = 'js.html.' + (switch name.split('Attr') {
+          case ['Global', '']: '';
+          case [name, '']: name;
+          default: throw 'assert';
+        }) + 'Element';
+        var ct = html.asComplexType();
+        (macro @:pos(field.pos) (null: $ct)).typeof().sure();
+      default: throw 'assert';
+    }
+
   public function new() {}
 
-  public function parse(selector: Expr, ?attrs: Expr, ?children: Array<Expr>) {
-    if (children == null) children = [];
-    if (attrs == null) attrs = macro null;
-    else if (!isAttrs(attrs)) children.unshift(attrs);
+  public function parse(selector: Expr, extra: Array<Expr>) {
+    var parsedExtra = getAttrsAndChildren(extra);
+    var attrs = parsedExtra.attrs;
+    var children = parsedExtra.children;
     return switch selector {
       case {expr: EConst(CString(source)), pos: pos}:
-        var selector = parseSelector(source, pos);
-        if (selector.tag.indexOf('-') > 0) throw 'todo: custom elements';
-        if (!dom.exists(selector.tag)) selectorE.reject('Not a valid html element: $source');
-
-      default: 
-        var type = Context.getType(selectorE.toString());
-        // Todo: typecheck props
+        var parsed = parseSelector(source, selector);
+        if (parsed.tag.indexOf('-') > 0) throw 'todo: custom elements';
+        if (!dom.exists(parsed.tag)) 
+          selector.reject('Not a valid html element: $source');
+        var element = dom[parsed.tag];
+        if (!element.hasChildren) 
+          switch children {
+            case null | []:
+            default:
+              children[0]
+                .reject('Element "${parsed.tag}" cannot contain children');
+          }
+        var attributes = Attributes.ofExpr(parsed.tag, element.type, attrs);
+        if (parsed.id != null) 
+          attributes.set('id', macro @:pos(selector.pos) $v{parsed.id});
+        if (parsed.classes.length > 0)
+          attributes.addClasses(parsed.classes);
+        for (key in parsed.attrs.keys())
+          attributes.set(key, parsed.attrs[key]);
+        Element(parsed.tag, attributes, children);
+      default:
+        var type = Context.getType(selector.toString());
+        // Todo: typecheck props etc
         Component(selector, attrs, children);
+    }
+  }
+  
+  function getAttrsAndChildren(extra: Array<Expr>) {
+    return switch extra {
+      case null | []:
+        {attrs: macro null, children: []}
+      case [attrs]:
+        if (isAttrs(attrs)) {attrs: attrs, children: []}
+        else {attrs: macro null, children: [attrs]}
+      default:
+        {attrs: extra[0], children: extra.slice(1)}
     }
   }
 
@@ -70,13 +112,7 @@ class Parser {
         }
     }
 
-  function isNull(e: Expr) 
-    return switch e {
-      case macro null: true;
-      default: false;
-    }
-
-  function parseSelector(source: String, pos: Position): Selector {
+  function parseSelector(source: String, expr: Expr): Selector {
     var selector: Selector = {
       tag: 'div', id: null, 
       classes: [], attrs: new Map()
@@ -92,28 +128,17 @@ class Parser {
           if (tag != null) selector.tag = tag;
           selector.classes = classes;
           for (attr in attrs) switch attr.operator {
-            case Exactly: selector.attrs[attr.name] = macro @:pos(pos) $v{attr.value};
-            case None if (attr.value == null): selector.attrs[attr.name] = macro @:pos(pos) true;
-            default: throw 'Unsupported operation at $pos';
+            case Exactly: 
+              selector.attrs[attr.name] = macro @:pos(expr.pos) $v{attr.value};
+            case None if (attr.value == null): 
+              selector.attrs[attr.name] = macro @:pos(expr.pos) true;
+            default: expr.reject('Unsupported attribute in selector');
           }
           selector;
         case []: selector;
-        default: throw 'Single selector expected at $pos';
+        default: expr.reject('Single selector expected');
       }
       case Failure(error): throw error;
     }
   }
-
-  function elementType(field) 
-    return switch field.type {
-      case TType(_.get() => {module: 'tink.domspec.Attributes', name: name}, _): 
-        var html = 'js.html.' + (switch name.split('Attr') {
-          case ['Global', '']: '';
-          case [name, '']: name;
-          default: throw 'assert';
-        }) + 'Element';
-        var ct = html.asComplexType();
-        (macro @:pos(field.pos) (null: $ct)).typeof().sure();
-      default: throw 'assert';
-    }
 }

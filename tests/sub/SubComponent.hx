@@ -3,10 +3,27 @@ package sub;
 import helder.vdom.Component;
 import haxe.ds.Vector;
 
-class SubComponent extends Component {
+class MyComponent extends Component {
   function render() {
-    var test = new Vector(5);
-    trace(test);
-    return h('.abc', {attr: true});
+    return h('.abc#idtje');
   }
+}
+
+class Sub extends Component<{attr: Bool}> {
+  function render() {
+    return h('.sub', 'Sub');
+  }
+}
+
+class SubComponent extends Component {
+  override function onInit() {
+    trace('ok');
+  }
+  function render()
+    return h('', {'class': 'abcd'}, 
+      h('input[type=text]'),
+      h(MyComponent),
+      h(Sub),
+      h('.yes', {onclick: e -> $type(e.currentTarget)}, 'Test')
+    );
 }

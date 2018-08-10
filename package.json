@@ -11,6 +11,6 @@
     "examples": "cd examples/todomvc && haxe build.hxml"
   },
   "devDependencies": {
-    "lix": "^15.2.0-alpha"
+    "lix": "^15.3.0-alpha.1"
   }
 }
