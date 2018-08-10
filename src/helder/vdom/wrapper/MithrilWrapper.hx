@@ -1,40 +1,33 @@
 package helder.vdom.wrapper;
 
-import helder.vdom.Wrapper;
+#if macro
+import haxe.macro.Expr;
+import haxe.macro.Context;
+import helder.hyperscript.Parser;
+using tink.MacroApi;
+#end
 
-#if !macro
 @:native('m') #if !no_require @:jsRequire('mithril/hyperscript') #end
 extern class MithrilExtern {
   @:selfCall
   public static function m(selector: Dynamic, attrs: Dynamic, ?children: Dynamic): Dynamic;
 }
-#else
-import haxe.macro.Expr;
-import haxe.macro.Context;
-using tink.MacroApi;
-#end
 
-//@:autoBuild(helder.vdom.wrapper.MithrilWrapper.build())
 class MithrilWrapper<Props: {}, State: {}> {
   var props: Props;
   var state: State;
 
-  public function new(vnode) {
+  public function new(vnode)
     props = vnode.props;
-  }
 
   macro function h(ethis: Expr, selector: Expr, ?attrs: Expr, ?children: Array<Expr>) {
-    switch selector.getString() {
-      case Success(selector): 
-        trace(selector);
-      default: 
-        //var type = Context.getType(selector.toString());
-        return selector;
-    }
-    return macro 'root comp';
+    parser.parse(selector, attrs, children);
+    return macro null;
   }
 
-  #if !macro
+  #if macro
+  static var parser = new Parser();
+  #else
   @:keep function oninit(vnode) {
     props = vnode.props;
     onInit();

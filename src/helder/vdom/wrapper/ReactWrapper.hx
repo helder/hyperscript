@@ -3,6 +3,7 @@ package helder.vdom.wrapper;
 #if macro
 import haxe.macro.Expr;
 import haxe.macro.Context;
+import helder.hyperscript.Parser;
 using tink.MacroApi;
 #end
 
@@ -22,18 +23,15 @@ extern class ReactDom {
 }
 
 class ReactWrapper<Props: {}, State: {}> extends ReactComponent<Props, State> {
+  static 
   macro function h(ethis: Expr, selector: Expr, ?attrs: Expr, ?children: Array<Expr>) {
-    switch selector.getString() {
-      case Success(selector): 
-        trace(selector);
-      default: 
-        //var type = Context.getType(selector.toString());
-        return selector;
-    }
-    return macro 'root comp';
+    parser.parse(selector, attrs, children);
+    return macro null;
   }
   
-  #if !macro
+  #if macro
+  static var parser = new Parser();
+  #else
   public function new(props) {
     super(props);
     onInit();

@@ -18,7 +18,7 @@ class TestComponent {
   public function new() {}
 
   public function testCreation() {
-    trace(@:privateAccess new SubComponent(null).render());
+    trace(@:privateAccess new SubComponent(null).view(null));
     return assert(true);
   }
 }
